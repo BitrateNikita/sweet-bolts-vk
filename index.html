@@ -152,15 +152,29 @@ async function initVK(){
   menu();
 }
 // --- Реклама через VK ---
-function showReward(onReward){
-  if(vkBridge){
-    vkBridge.send('VKWebAppShowNativeAds',{ad_format:'reward'})
-      .then(()=>{ onReward(); })
-      .catch(err=>{ console.warn('VK ad error', err); alert('Реклама временно недоступна'); });
+function showReward(onReward) {
+  if (typeof vkBridge !== 'undefined' && vkBridge !== null) {
+    vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
+      .then((data) => {
+        if (data.result) {
+          // Реклама успешно досмотрена — выдаём награду
+          onReward();
+        } else {
+          // Пользователь закрыл рекламу раньше времени
+          alert('Реклама была закрыта. Награда не начислена.');
+        }
+      })
+      .catch((error) => {
+        console.warn('Ошибка рекламы VK:', error);
+        // Если реклама не загрузилась (например, нет интернета или мало аудитории)
+        alert('Реклама временно недоступна. Попробуйте позже.');
+      });
   } else {
+    // Если игра открыта не в ВК (например, в браузере для теста)
     onReward();
   }
 }
+ 
 function showInter(cb){ cb(); }
 
 function menu(){
